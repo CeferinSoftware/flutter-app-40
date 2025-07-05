@@ -1,0 +1,85 @@
+
+name: Build Flutter App
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "App Name"
+        required: true
+      package_name:
+        description: "Package Name"
+        required: true
+      app_url:
+        description: "Website URL"
+        required: true
+      version:
+        description: "App Version"
+        required: false
+        default: "1.0.0"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.0"
+          channel: "stable"
+          
+      - name: Flutter doctor
+        run: flutter doctor -v
+        
+      - name: Debug - Show current files
+        run: |
+          echo "🔍 DEBUG: Archivos actuales en el build"
+          echo "📂 Branch actual: ${{ github.ref }}"
+          echo "📄 main.dart (primeras 10 líneas):"
+          head -10 lib/main.dart || echo "❌ lib/main.dart no encontrado"
+          echo "📄 pubspec.yaml:"
+          cat pubspec.yaml || echo "❌ pubspec.yaml no encontrado"
+        
+      - name: Install dependencies
+        run: flutter pub get
+        
+      - name: Generate launcher icons
+        run: |
+          if [ -f "assets/icon.png" ]; then
+            echo "📱 Generando iconos personalizados con flutter_launcher_icons..."
+            flutter pub run flutter_launcher_icons
+          else
+            echo "ℹ️ No se encontró icono personalizado - usando iconos por defecto"
+          fi
+        
+      - name: Build APK
+        run: flutter build apk --release --verbose
+        
+      - name: Build AAB
+        run: flutter build appbundle --release --verbose
+        
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
