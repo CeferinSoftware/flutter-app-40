@@ -11,9 +11,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter WebView Template',
+      title: 'orgullo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color.fromRGBO(141, 235, 0, 1),
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
       ),
       home: const WebViewScreen(),
@@ -47,15 +51,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
           onPageFinished: (url) => setState(() => isLoading = false),
         ),
       )
-      ..loadRequest(Uri.parse('https://flutter.dev'));
+      ..loadRequest(Uri.parse('https://orgullodominicano.org/'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter WebView Template'),
-        backgroundColor: Colors.blue,
+        title: Text('orgullo'),
+        backgroundColor: Color.fromRGBO(141, 235, 0, 1),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -68,7 +72,11 @@ class _WebViewScreenState extends State<WebViewScreen> {
         children: [
           WebViewWidget(controller: controller),
           if (isLoading)
-            const Center(child: CircularProgressIndicator()),
+            Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(141, 235, 0, 1)),
+              ),
+            ),
         ],
       ),
     );
